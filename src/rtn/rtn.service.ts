@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { RtnResponse } from './interfaces/rtn-response.interface';
 import { VentasBrutasResponse, VentasBrutasRequest } from './interfaces/ventas-brutas-response.interface';
+import { UserLogsService, UserAction } from '../users/user-logs.service';
 
 @Injectable()
 export class RtnService {
@@ -10,7 +11,10 @@ export class RtnService {
   private readonly username: string;
   private readonly password: string;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private userLogsService: UserLogsService
+  ) {
     const apiHost = this.configService.get<string>('AMDC_API_HOST');
     const username = this.configService.get<string>('AMDC_API_USERNAME');
     const password = this.configService.get<string>('AMDC_API_PASSWORD');
@@ -73,7 +77,7 @@ export class RtnService {
     }
   }
 
-  async consultarRtn(rtn: string): Promise<RtnResponse> {
+  async consultarRtn(rtn: string, user: { id: string; username: string }): Promise<RtnResponse> {
     try {
       this.validateRtn(rtn);
 
@@ -93,8 +97,22 @@ export class RtnService {
         }
       );
 
+      // Log successful RTN consultation
+      await this.userLogsService.createLog(
+        user.id,
+        UserAction.READ,
+        `Consulta exitosa de RTN: ${rtn}`
+      );
+
       return response.data;
     } catch (error) {
+      // Log failed RTN consultation
+      await this.userLogsService.createLog(
+        user.id,
+        UserAction.READ,
+        `Error en consulta de RTN: ${rtn} - ${axios.isAxiosError(error) ? error.response?.data?.message || 'Error de conexión' : error.message}`
+      );
+
       if (axios.isAxiosError(error)) {
         throw new HttpException(
           error.response?.data?.message || 'Error al consultar el RTN',
@@ -105,7 +123,7 @@ export class RtnService {
     }
   }
 
-  async consultarVentasBrutas(data: VentasBrutasRequest): Promise<VentasBrutasResponse> {
+  async consultarVentasBrutas(data: VentasBrutasRequest, user: { id: string; username: string }): Promise<VentasBrutasResponse> {
     try {
       this.validateRtn(data.Rtn);
       this.validatePeriodos(data.PeriodoDesde, data.PeriodoHasta);
@@ -126,8 +144,22 @@ export class RtnService {
         }
       );
 
+      // Log successful ventas brutas consultation
+      await this.userLogsService.createLog(
+        user.id,
+        UserAction.READ,
+        `Consulta exitosa de Ventas Brutas - RTN: ${data.Rtn}, Periodo: ${data.PeriodoDesde}-${data.PeriodoHasta}`
+      );
+
       return response.data;
     } catch (error) {
+      // Log failed ventas brutas consultation
+      await this.userLogsService.createLog(
+        user.id,
+        UserAction.READ,
+        `Error en consulta de Ventas Brutas - RTN: ${data.Rtn}, Periodo: ${data.PeriodoDesde}-${data.PeriodoHasta} - ${axios.isAxiosError(error) ? error.response?.data?.message || 'Error de conexión' : error.message}`
+      );
+
       if (axios.isAxiosError(error)) {
         throw new HttpException(
           error.response?.data?.message || 'Error al consultar las ventas brutas',
