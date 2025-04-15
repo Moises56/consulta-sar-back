@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  role      String   @default("OPERADOR")
+  name      String
+  identidad String   @unique
+  Nempleado String   @unique
+  gerencia  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  logs      UserLog[]
+
+  @@map("users")
+}
+
+model UserLog {
+  id          String   @id @default(uuid())
+  userId      String
+  action      String   // CREATE, UPDATE, DELETE, READ
+  details     String   // Detalles adicionales de la acción
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@map("user_logs")
+}

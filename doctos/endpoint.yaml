@@ -1,0 +1,190 @@
+endpoint
+
+login
+POST http://localhost:3000/auth/login
+
+body
+{
+    "login": "tu_usuario_o_email",
+    "password": "tu_contraseña"
+}
+
+Ahora los mensajes de error serán más específicos:
+
+Si el usuario o email no existe, recibirás:
+json
+{
+    "message": "Usuario o correo electrónico no encontrado",
+    "statusCode": 401
+}
+
+Si la contraseña es incorrecta:
+json
+{
+    "message": "Contraseña incorrecta",
+    "statusCode": 401
+}
+
+Si ocurre algún otro error durante el proceso:
+json
+{
+    "message": "Error durante el inicio de sesión",
+    "statusCode": 401
+}
+
+
+Register
+POST http://localhost:3000/auth/register
+
+body
+{
+    "email": "admin@amdc.hn",
+    "username": "admin",
+    "password": "admin123@",
+    "role":"ADMIN",
+    "name": "Admin",
+    "identidad":"08011995022745",
+    "gerencia":"GIS",
+    "Nempleado":"11050"
+}
+
+Ahora los mensajes de error serán más específicos:
+
+Si el email, nombre de usuario, identidad, número de empleado o gerencia ya existe, recibirás:
+json
+{
+    "message": "Ya existe un usuario con este correo electrónico, nombre de usuario, número de identidad, número de empleado o gerencia",
+    "statusCode": 409
+}
+
+Si ocurre algún otro error durante el proceso:
+json
+{
+    "message": "Error durante el registro",
+    "statusCode": 500
+}
+
+
+Get All Users
+
+1. Listar usuarios:
+GET http://localhost:3000/users
+Headers:
+Authorization: Bearer tu_token_jwt
+
+2. Crear usuario:
+POST http://localhost:3000/users
+Headers:
+Authorization: Bearer tu_token_jwt
+Content-Type: application/json
+
+Body:
+{
+    "email": "nuevo@ejemplo.com",
+    "username": "nuevo_usuario",
+    "password": "123456",
+    "name": "Nuevo Usuario",
+    "identidad": "0801199900001",
+    "Nempleado": "EMP002",
+    "gerencia": "TI",
+    "role": "OPERADOR"
+}
+
+3. Actualizar usuario:
+PATCH http://localhost:3000/users/:id
+Headers:
+Authorization: Bearer tu_token_jwt
+Content-Type: application/json
+
+Body:
+{
+    "name": "Nombre Actualizado",
+    "gerencia": "Nueva Gerencia",
+    "role": "OPERADOR"
+}
+
+4. Eliminar usuario:
+DELETE http://localhost:3000/users/:id
+Headers:
+Authorization: Bearer tu_token_jwt
+
+5. Listar usuarios con paginación:
+GET http://localhost:3000/users?page=1&limit=10
+Headers:
+Authorization: Bearer tu_token_jwt
+
+
+6. Puedes combinar todos los parámetros:
+
+GET http://localhost:3000/users?page=1&limit=10&name=nombre&role=ROL&identidad=identidad&Nempleado=numero_de_empleado&gerencia=gerencia
+Headers:
+Authorization: Bearer tu_token_jwt
+
+
+La respuesta tendrá este formato:
+
+{
+    "data": [
+        {
+            "id": "uuid",
+            "email": "usuario@ejemplo.com",
+            "username": "usuario1",
+            "name": "Usuario Ejemplo",
+            "role": "OPERADOR",
+            "identidad": "0801199912345",
+            "Nempleado": "EMP001",
+            "gerencia": "TI",
+            "createdAt": "2024-04-14T...",
+            "updatedAt": "2024-04-14T..."
+        }
+        // ... más usuarios
+    ],
+    "meta": {
+        "total": 100,         // total de registros
+        "page": 1,           // página actual
+        "limit": 10,         // registros por página
+        "totalPages": 10,    // total de páginas
+        "hasNextPage": true, // si hay más páginas
+        "hasPreviousPage": false // si hay páginas anteriores
+    }
+}
+
+
+
+GET http://localhost:3000/user-logs
+Headers:
+Authorization: Bearer tu_token_jwt
+
+# Parámetros opcionales:
+?userId=id_del_usuario    # Filtrar por usuario específico
+?action=CREATE           # Filtrar por tipo de acción (CREATE, UPDATE, DELETE, READ)
+?startDate=2024-04-14   # Filtrar desde una fecha
+?endDate=2024-04-14     # Filtrar hasta una fecha
+?page=1                 # Página actual
+?limit=10              # Registros por página
+
+
+{
+    "data": [
+        {
+            "id": "uuid",
+            "userId": "id_del_usuario",
+            "action": "CREATE",
+            "details": "Creación de nuevo usuario: username",
+            "createdAt": "2024-04-14T...",
+            "user": {
+                "username": "admin",
+                "email": "admin@example.com",
+                "name": "Admin User"
+            }
+        }
+    ],
+    "meta": {
+        "total": 100,
+        "page": 1,
+        "limit": 10,
+        "totalPages": 10,
+        "hasNextPage": true,
+        "hasPreviousPage": false
+    }
+}
