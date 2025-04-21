@@ -37,3 +37,22 @@ model UserLog {
 
   @@map("user_logs")
 }
+
+model DATOS_AMDC {
+  id                  String   @id @default(uuid())
+  RTN                 String
+  ICS                 String
+  NOMBRE              String
+  NOMBRE_COMERCIAL    String
+  ANIO                Int
+  CANTIDAD_DECLARADA  Decimal
+  ESTATUS             Int
+  FECHA               DateTime
+
+  @@index([RTN])
+  @@index([ICS])
+  @@index([ANIO])
+  @@index([NOMBRE])
+  @@index([NOMBRE_COMERCIAL])
+  @@map("datos_amdc")
+}

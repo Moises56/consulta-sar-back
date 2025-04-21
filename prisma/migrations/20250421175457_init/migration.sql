@@ -1,0 +1,63 @@
+BEGIN TRY
+
+BEGIN TRAN;
+
+-- CreateTable
+CREATE TABLE [dbo].[users] (
+    [id] NVARCHAR(1000) NOT NULL,
+    [email] NVARCHAR(1000) NOT NULL,
+    [username] NVARCHAR(1000) NOT NULL,
+    [password] NVARCHAR(1000) NOT NULL,
+    [role] NVARCHAR(1000) NOT NULL CONSTRAINT [users_role_df] DEFAULT 'OPERADOR',
+    [name] NVARCHAR(1000) NOT NULL,
+    [identidad] NVARCHAR(1000) NOT NULL,
+    [Nempleado] NVARCHAR(1000) NOT NULL,
+    [gerencia] NVARCHAR(1000) NOT NULL,
+    [createdAt] DATETIME2 NOT NULL CONSTRAINT [users_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
+    [updatedAt] DATETIME2 NOT NULL,
+    CONSTRAINT [users_pkey] PRIMARY KEY CLUSTERED ([id]),
+    CONSTRAINT [users_email_key] UNIQUE NONCLUSTERED ([email]),
+    CONSTRAINT [users_username_key] UNIQUE NONCLUSTERED ([username]),
+    CONSTRAINT [users_identidad_key] UNIQUE NONCLUSTERED ([identidad]),
+    CONSTRAINT [users_Nempleado_key] UNIQUE NONCLUSTERED ([Nempleado])
+);
+
+-- CreateTable
+CREATE TABLE [dbo].[user_logs] (
+    [id] NVARCHAR(1000) NOT NULL,
+    [userId] NVARCHAR(1000) NOT NULL,
+    [action] NVARCHAR(1000) NOT NULL,
+    [details] NVARCHAR(1000) NOT NULL,
+    [createdAt] DATETIME2 NOT NULL CONSTRAINT [user_logs_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT [user_logs_pkey] PRIMARY KEY CLUSTERED ([id])
+);
+
+-- CreateTable
+CREATE TABLE [dbo].[datos_amdc] (
+    [id] NVARCHAR(1000) NOT NULL,
+    [RTN] NVARCHAR(1000) NOT NULL,
+    [ICS] NVARCHAR(1000) NOT NULL,
+    [NOMBRE] NVARCHAR(1000) NOT NULL,
+    [NOMBRE_COMERCIAL] NVARCHAR(1000) NOT NULL,
+    [ANIO] INT NOT NULL,
+    [CANTIDAD_DECLARADA] DECIMAL(32,16) NOT NULL,
+    [ESTATUS] INT NOT NULL,
+    [FECHA] DATETIME2 NOT NULL,
+    CONSTRAINT [datos_amdc_pkey] PRIMARY KEY CLUSTERED ([id])
+);
+
+-- AddForeignKey
+ALTER TABLE [dbo].[user_logs] ADD CONSTRAINT [user_logs_userId_fkey] FOREIGN KEY ([userId]) REFERENCES [dbo].[users]([id]) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+COMMIT TRAN;
+
+END TRY
+BEGIN CATCH
+
+IF @@TRANCOUNT > 0
+BEGIN
+    ROLLBACK TRAN;
+END;
+THROW
+
+END CATCH

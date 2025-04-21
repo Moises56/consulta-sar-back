@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { RtnModule } from './rtn/rtn.module';
+import { DatosAmdcModule } from './datos-amdc/datos-amdc.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { RtnModule } from './rtn/rtn.module';
     AuthModule,
     UsersModule,
     RtnModule,
+    DatosAmdcModule,
   ],
   controllers: [AppController],
   providers: [AppService],
