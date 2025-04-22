@@ -22,6 +22,13 @@ import { Roles } from '../auth/decorators/roles.decorator';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMIN')
 export class UsersController {
+  @Get('profile')
+  @UseGuards(JwtAuthGuard)
+  async getProfile(@Req() req: RequestWithUser) {
+    // Devuelve el usuario autenticado (sin contraseña)
+    const { password, ...user } = req.user;
+    return user;
+  }
   constructor(private readonly usersService: UsersService) {}
 
   @Get()

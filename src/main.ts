@@ -8,8 +8,11 @@ async function bootstrap() {
   
   // Enable CORS
   app.enableCors({
-    origin: ['http://localhost:4200'], // Angular frontend URL
+    origin: 'http://localhost:4200',
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PACTH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Accept', 'Authorization'],
+    exposedHeaders: ['Set-Cookie']
   });
 
   // Global pipes
