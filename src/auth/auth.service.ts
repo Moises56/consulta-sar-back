@@ -61,22 +61,34 @@ export class AuthService {
     const payload = { email: user.email, sub: user.id, role: user.role };
     const token = this.jwtService.sign(payload);
 
-    // Set JWT in HTTP-only cookie
-    // response.cookie('jwt', token, {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === 'production',
-    //   sameSite: 'strict',
-    //   maxAge: 24 * 60 * 60 * 1000, // 1 day
-    // });
-
-    response.cookie('jwt', token, {
+    // Set cookie options based on environment
+    const cookieOptions: {
+      httpOnly: boolean;
+      secure: boolean;
+      sameSite: 'none' | 'lax' | 'strict';
+      maxAge: number;
+      domain?: string;
+    } = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none', // Cambiar a 'none' para permitir cross-site
+      secure: process.env.NODE_ENV === 'production' || true, // Required for SameSite=None
+      sameSite: 'none', // Allow cross-site requests
       maxAge: 24 * 60 * 60 * 1000, // 1 day
-      domain:
-        process.env.NODE_ENV === 'production' ? 'api.amdc.hn' : 'localhost',
-    });
+    };
+
+    // Only add domain in production environments
+    if (process.env.NODE_ENV === 'production') {
+      // Check which domain we're on and set appropriate cookie domain
+      const host = response.req?.headers?.host || '';
+
+      if (host.includes('api.amdc.hn')) {
+        cookieOptions.domain = 'api.amdc.hn';
+      } else if (host.includes('consulta-sar-back.onrender.com')) {
+        cookieOptions.domain = 'consulta-sar-back.onrender.com';
+      }
+      // For localhost, we don't set a domain (default behavior)
+    }
+
+    response.cookie('jwt', token, cookieOptions);
 
     // Registrar el inicio de sesión exitoso
     await this.userLogsService.createLog(
@@ -90,7 +102,6 @@ export class AuthService {
       message: 'Logged in successfully',
     };
   }
-
   async register(userData: {
     email: string;
     username: string;
