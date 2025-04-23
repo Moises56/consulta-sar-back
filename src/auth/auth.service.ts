@@ -62,11 +62,20 @@ export class AuthService {
     const token = this.jwtService.sign(payload);
 
     // Set JWT in HTTP-only cookie
+    // response.cookie('jwt', token, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === 'production',
+    //   sameSite: 'strict',
+    //   maxAge: 24 * 60 * 60 * 1000, // 1 day
+    // });
+
     response.cookie('jwt', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'none', // Cambiar a 'none' para permitir cross-site
       maxAge: 24 * 60 * 60 * 1000, // 1 day
+      domain:
+        process.env.NODE_ENV === 'production' ? 'api.amdc.hn' : 'localhost',
     });
 
     // Registrar el inicio de sesión exitoso
