@@ -9,8 +9,9 @@ async function bootstrap() {
   const allowedOrigins = [
     'https://consulta.amdc.hn',
     'http://localhost:4200',
+    'https://consulta-sar.netlify.app',
   ];
-  
+
   // Enable CORS
   app.enableCors({
     origin: (origin, callback) => {
@@ -23,7 +24,7 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Accept', 'Authorization'],
-    exposedHeaders: ['Set-Cookie']
+    exposedHeaders: ['Set-Cookie'],
   });
 
   // Global pipes

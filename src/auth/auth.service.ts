@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -17,22 +21,21 @@ export class AuthService {
   async validateUser(login: string, password: string) {
     const user = await this.prisma.user.findFirst({
       where: {
-        OR: [
-          { email: login },
-          { username: login }
-        ]
-      }
+        OR: [{ email: login }, { username: login }],
+      },
     });
 
     if (!user) {
       // Registrar intento fallido de inicio de sesión - usuario no encontrado
       const errorDetails = `Intento fallido de inicio de sesión: usuario o correo ${login} no encontrado`;
       await this.userLogsService.createLog(
-        'system',  // ID especial para eventos del sistema
+        'system', // ID especial para eventos del sistema
         UserAction.LOGIN,
         errorDetails,
       );
-      throw new UnauthorizedException('Usuario o correo electrónico no encontrado');
+      throw new UnauthorizedException(
+        'Usuario o correo electrónico no encontrado',
+      );
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -51,7 +54,10 @@ export class AuthService {
     return result;
   }
 
-  async login(user: { id: string; email: string; role: string }, response: Response) {
+  async login(
+    user: { id: string; email: string; role: string },
+    response: Response,
+  ) {
     const payload = { email: user.email, sub: user.id, role: user.role };
     const token = this.jwtService.sign(payload);
 
@@ -93,28 +99,36 @@ export class AuthService {
             { email: userData.email },
             { username: userData.username },
             { identidad: userData.identidad },
-            { Nempleado: userData.Nempleado }
-          ]
-        }
+            { Nempleado: userData.Nempleado },
+          ],
+        },
       });
 
       if (existingUser) {
         if (existingUser.email === userData.email) {
-          throw new ConflictException('Ya existe un usuario con este correo electrónico');
+          throw new ConflictException(
+            'Ya existe un usuario con este correo electrónico',
+          );
         }
         if (existingUser.username === userData.username) {
-          throw new ConflictException('Ya existe un usuario con este nombre de usuario');
+          throw new ConflictException(
+            'Ya existe un usuario con este nombre de usuario',
+          );
         }
         if (existingUser.identidad === userData.identidad) {
-          throw new ConflictException('Ya existe un usuario con este número de identidad');
+          throw new ConflictException(
+            'Ya existe un usuario con este número de identidad',
+          );
         }
         if (existingUser.Nempleado === userData.Nempleado) {
-          throw new ConflictException('Ya existe un usuario con este número de empleado');
+          throw new ConflictException(
+            'Ya existe un usuario con este número de empleado',
+          );
         }
       }
 
       const hashedPassword = await bcrypt.hash(userData.password, 10);
-      
+
       const user = await this.prisma.user.create({
         data: {
           ...userData,
@@ -132,16 +146,24 @@ export class AuthService {
         if (error.code === 'P2002') {
           const field = error.meta?.target as string[];
           if (field.includes('email')) {
-            throw new ConflictException('Ya existe un usuario con este correo electrónico');
+            throw new ConflictException(
+              'Ya existe un usuario con este correo electrónico',
+            );
           }
           if (field.includes('username')) {
-            throw new ConflictException('Ya existe un usuario con este nombre de usuario');
+            throw new ConflictException(
+              'Ya existe un usuario con este nombre de usuario',
+            );
           }
           if (field.includes('identidad')) {
-            throw new ConflictException('Ya existe un usuario con este número de identidad');
+            throw new ConflictException(
+              'Ya existe un usuario con este número de identidad',
+            );
           }
           if (field.includes('Nempleado')) {
-            throw new ConflictException('Ya existe un usuario con este número de empleado');
+            throw new ConflictException(
+              'Ya existe un usuario con este número de empleado',
+            );
           }
         }
       }
