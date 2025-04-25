@@ -10,15 +10,16 @@ async function bootstrap() {
     'https://consulta.amdc.hn',
     'http://localhost:4200',
     'https://consulta-sar.netlify.app',
+    'https://consulta-sar-back.onrender.com',
   ];
 
   // Enable CORS
   app.enableCors({
-    origin: (origin, callback) => {
+    origin: (origin: string | undefined, callback: (error: Error | null, allow: boolean) => void) => {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(new Error('Not allowed by CORS'), false);
       }
     },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

@@ -23,6 +23,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   logs      UserLog[]
+  consultasVB MisConsultasVB[]
 
   @@map("users")
 }
@@ -55,4 +56,23 @@ model DATOS_AMDC {
   @@index([NOMBRE])
   @@index([NOMBRE_COMERCIAL])
   @@map("datos_amdc")
+}
+
+model MisConsultasVB {
+  id                String    @id @default(uuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id])
+  rtn               String
+  nombreComercial   String
+  anio              String
+  importeTotalVentas Float
+  declaracionesAmdc String    // Storing serialized JSON as SQL Server doesn't support native JSON
+  diferencia        Float
+  analisis          String
+  fechaConsulta     DateTime  @default(now())
+
+  @@index([userId])
+  @@index([rtn])
+  @@index([anio])
+  @@map("mis_consultas_vb")
 }

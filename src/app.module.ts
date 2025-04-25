@@ -7,6 +7,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { RtnModule } from './rtn/rtn.module';
 import { DatosAmdcModule } from './datos-amdc/datos-amdc.module';
+import { MisConsultasVbModule } from './mis-consultas-vb/mis-consultas-vb.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { DatosAmdcModule } from './datos-amdc/datos-amdc.module';
     UsersModule,
     RtnModule,
     DatosAmdcModule,
+    MisConsultasVbModule,
   ],
   controllers: [AppController],
   providers: [AppService],
