@@ -250,4 +250,47 @@ export class AuthService {
       message: 'Contraseña actualizada exitosamente',
     };
   }
+
+  async changeOwnPassword(userId: string, currentPassword: string, newPassword: string) {
+    // Verificar que el usuario existe
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, password: true },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    // Verificar que la contraseña actual es correcta
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      await this.userLogsService.createLog(
+        userId,
+        UserAction.PASSWORD_CHANGE,
+        `Intento fallido de cambio de contraseña: contraseña actual incorrecta para el usuario ${user.email}`,
+      );
+      throw new UnauthorizedException('La contraseña actual es incorrecta');
+    }
+
+    // Encriptar la nueva contraseña
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Actualizar la contraseña
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    // Registrar el cambio de contraseña exitoso
+    await this.userLogsService.createLog(
+      userId,
+      UserAction.PASSWORD_CHANGE,
+      `El usuario ${user.email} cambió su propia contraseña exitosamente`,
+    );
+
+    return {
+      message: 'Contraseña actualizada exitosamente',
+    };
+  }
 }

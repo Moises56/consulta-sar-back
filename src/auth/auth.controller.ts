@@ -18,6 +18,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './decorators/roles.decorator';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { ChangeOwnPasswordDto } from './dto/change-own-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -67,6 +68,19 @@ export class AuthController {
       adminId,
       userId,
       changePasswordDto.password,
+    );
+  }
+
+  @Patch('profile/password')
+  @UseGuards(JwtAuthGuard)
+  async changeOwnPassword(
+    @Body() changeOwnPasswordDto: ChangeOwnPasswordDto,
+    @Request() req,
+  ) {
+    return this.authService.changeOwnPassword(
+      req.user.id,
+      changeOwnPasswordDto.currentPassword,
+      changeOwnPasswordDto.newPassword,
     );
   }
 }
