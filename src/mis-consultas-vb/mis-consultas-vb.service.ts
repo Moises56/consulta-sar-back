@@ -7,12 +7,12 @@ import { UserLogsService, UserAction } from '../users/user-logs.service';
 export class MisConsultasVbService {
   constructor(
     private prisma: PrismaService,
-    private userLogsService: UserLogsService
+    private userLogsService: UserLogsService,
   ) {}
 
   async create(userId: string, createDto: CreateMisConsultasVbDto) {
     const { declaracionesAmdc, ...rest } = createDto;
-    
+
     const consulta = await this.prisma.misConsultasVB.create({
       data: {
         ...rest,
@@ -25,26 +25,31 @@ export class MisConsultasVbService {
     await this.userLogsService.createLog(
       userId,
       UserAction.CREATE,
-      `Usuario guardó consulta RTN: ${createDto.rtn}, Año: ${createDto.anio}, Diferencia: ${createDto.diferencia}`
+      `Usuario guardó consulta RTN: ${createDto.rtn}, Año: ${createDto.anio}, Diferencia: ${createDto.diferencia}`,
     );
 
     return consulta;
   }
 
-  async findAll(userId: string, page: number = 1, limit: number = 10, rtn?: string) {
+  async findAll(
+    userId: string,
+    page: number = 1,
+    limit: number = 10,
+    rtn?: string,
+  ) {
     const skip = (page - 1) * limit;
-    
+
     // Build where clause with filters
     const where: any = { userId };
-    
+
     // Add RTN filter if provided
     if (rtn) {
       where.rtn = { contains: rtn };
     }
-    
+
     // Count total records for pagination
     const total = await this.prisma.misConsultasVB.count({ where });
-    
+
     // Get paginated results
     const consultas = await this.prisma.misConsultasVB.findMany({
       where,
@@ -52,18 +57,18 @@ export class MisConsultasVbService {
       skip,
       take: limit,
     });
-    
+
     // Parse the JSON strings back to objects
-    const parsedConsultas = consultas.map(consulta => ({
+    const parsedConsultas = consultas.map((consulta) => ({
       ...consulta,
-      declaracionesAmdc: JSON.parse(consulta.declaracionesAmdc)
+      declaracionesAmdc: JSON.parse(consulta.declaracionesAmdc),
     }));
 
     // Log the read action
     await this.userLogsService.createLog(
       userId,
       UserAction.READ,
-      `Usuario consultó su historial de consultas${rtn ? ` filtrando por RTN: ${rtn}` : ''}`
+      `Usuario consultó su historial de consultas${rtn ? ` filtrando por RTN: ${rtn}` : ''}`,
     );
 
     // Return with pagination metadata
@@ -75,8 +80,8 @@ export class MisConsultasVbService {
         limit,
         totalPages: Math.ceil(total / limit),
         hasNextPage: skip + limit < total,
-        hasPreviousPage: page > 1
-      }
+        hasPreviousPage: page > 1,
+      },
     };
   }
 
@@ -84,19 +89,19 @@ export class MisConsultasVbService {
     const consulta = await this.prisma.misConsultasVB.findFirst({
       where: { id, userId },
     });
-    
+
     if (!consulta) return null;
-    
+
     // Log the read action
     await this.userLogsService.createLog(
       userId,
       UserAction.READ,
-      `Usuario consultó el detalle de la consulta ID: ${id}`
+      `Usuario consultó el detalle de la consulta ID: ${id}`,
     );
-    
+
     return {
       ...consulta,
-      declaracionesAmdc: JSON.parse(consulta.declaracionesAmdc)
+      declaracionesAmdc: JSON.parse(consulta.declaracionesAmdc),
     };
   }
 
@@ -109,9 +114,9 @@ export class MisConsultasVbService {
     await this.userLogsService.createLog(
       userId,
       UserAction.DELETE,
-      `Usuario eliminó la consulta ID: ${id}`
+      `Usuario eliminó la consulta ID: ${id}`,
     );
-    
+
     return { message: 'Consulta eliminada correctamente' };
   }
 }

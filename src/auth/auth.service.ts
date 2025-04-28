@@ -197,4 +197,57 @@ export class AuthService {
       message: 'Logged out successfully',
     };
   }
+
+  async changePassword(adminId: string, userId: string, newPassword: string) {
+    // Verificar que el usuario que hace la solicitud es un administrador
+    const admin = await this.prisma.user.findUnique({
+      where: { id: adminId },
+      select: { role: true },
+    });
+
+    if (!admin || admin.role !== 'ADMIN') {
+      // Registrar intento no autorizado
+      await this.userLogsService.createLog(
+        adminId,
+        UserAction.PASSWORD_CHANGE,
+        `Intento no autorizado de cambio de contraseña para el usuario ${userId}`,
+      );
+      throw new UnauthorizedException('Solo los administradores pueden cambiar contraseñas');
+    }
+
+    // Verificar que el usuario a modificar existe
+    const userToUpdate = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+
+    if (!userToUpdate) {
+      await this.userLogsService.createLog(
+        adminId,
+        UserAction.PASSWORD_CHANGE,
+        `Intento de cambio de contraseña para un usuario inexistente: ${userId}`,
+      );
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    // Encriptar la nueva contraseña
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Actualizar la contraseña
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    // Registrar el cambio de contraseña exitoso
+    await this.userLogsService.createLog(
+      adminId,
+      UserAction.PASSWORD_CHANGE,
+      `Cambio de contraseña exitoso para el usuario ${userToUpdate.email}`,
+    );
+
+    return {
+      message: 'Contraseña actualizada exitosamente',
+    };
+  }
 }

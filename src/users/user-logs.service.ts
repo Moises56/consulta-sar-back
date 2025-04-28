@@ -7,6 +7,7 @@ export enum UserAction {
   DELETE = 'DELETE',
   READ = 'READ',
   LOGIN = 'LOGIN',
+  PASSWORD_CHANGE = 'PASSWORD_CHANGE',
 }
 
 @Injectable()

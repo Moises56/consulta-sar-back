@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards, Request, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+  Query,
+} from '@nestjs/common';
 import { MisConsultasVbService } from './mis-consultas-vb.service';
 import { CreateMisConsultasVbDto } from './dto/create-mis-consultas-vb.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -10,8 +20,14 @@ export class MisConsultasVbController {
   constructor(private readonly misConsultasVbService: MisConsultasVbService) {}
 
   @Post()
-  create(@Request() req: RequestWithUser, @Body() createMisConsultasVbDto: CreateMisConsultasVbDto) {
-    return this.misConsultasVbService.create(req.user.id, createMisConsultasVbDto);
+  create(
+    @Request() req: RequestWithUser,
+    @Body() createMisConsultasVbDto: CreateMisConsultasVbDto,
+  ) {
+    return this.misConsultasVbService.create(
+      req.user.id,
+      createMisConsultasVbDto,
+    );
   }
 
   @Get()
