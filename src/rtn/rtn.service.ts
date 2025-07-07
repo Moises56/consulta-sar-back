@@ -2,7 +2,10 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { RtnResponse } from './interfaces/rtn-response.interface';
-import { VentasBrutasResponse, VentasBrutasRequest } from './interfaces/ventas-brutas-response.interface';
+import {
+  VentasBrutasResponse,
+  VentasBrutasRequest,
+} from './interfaces/ventas-brutas-response.interface';
 import { UserLogsService, UserAction } from '../users/user-logs.service';
 
 @Injectable()
@@ -13,7 +16,7 @@ export class RtnService {
 
   constructor(
     private configService: ConfigService,
-    private userLogsService: UserLogsService
+    private userLogsService: UserLogsService,
   ) {
     const apiHost = this.configService.get<string>('AMDC_API_HOST');
     const username = this.configService.get<string>('AMDC_API_USERNAME');
@@ -30,7 +33,10 @@ export class RtnService {
 
   private validateRtn(rtn: string): void {
     if (!rtn || rtn.length !== 14) {
-      throw new HttpException('El RTN debe tener 14 dígitos', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'El RTN debe tener 14 dígitos',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -42,7 +48,10 @@ export class RtnService {
     // Validate format YYYYMM
     const regexPeriodo = /^\d{6}$/;
     if (!regexPeriodo.test(periodoDesde) || !regexPeriodo.test(periodoHasta)) {
-      throw new HttpException('Los períodos deben tener formato AAAAMM', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Los períodos deben tener formato AAAAMM',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const yearDesde = parseInt(periodoDesde.substring(0, 4));
@@ -52,14 +61,17 @@ export class RtnService {
 
     // Validate years are the same
     if (yearDesde !== yearHasta) {
-      throw new HttpException('Los períodos deben pertenecer al mismo año', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Los períodos deben pertenecer al mismo año',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     // Validate year range
     if (yearDesde < minYear || yearDesde > currentYear) {
       throw new HttpException(
         `El año debe estar entre ${minYear} y ${currentYear}`,
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -67,41 +79,52 @@ export class RtnService {
     if (yearDesde === 2024 && (monthDesde > 6 || monthHasta > 6)) {
       throw new HttpException(
         'Para el año 2024, solo están disponibles los períodos de enero a junio',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
     // Validate months
-    if (monthDesde < 1 || monthDesde > 12 || monthHasta < 1 || monthHasta > 12) {
-      throw new HttpException('Los meses deben estar entre 01 y 12', HttpStatus.BAD_REQUEST);
+    if (
+      monthDesde < 1 ||
+      monthDesde > 12 ||
+      monthHasta < 1 ||
+      monthHasta > 12
+    ) {
+      throw new HttpException(
+        'Los meses deben estar entre 01 y 12',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
-  async consultarRtn(rtn: string, user: { id: string; username: string }): Promise<RtnResponse> {
+  async consultarRtn(
+    rtn: string,
+    user: { id: string; username: string },
+  ): Promise<RtnResponse> {
     try {
       this.validateRtn(rtn);
 
       const url = `http://${this.apiHost}/int-middleware-gateway/api/v1/AMDC/ConsultaRTN`;
-      
+
       const response = await axios.post<RtnResponse>(
         url,
         { rtn },
         {
           auth: {
             username: this.username,
-            password: this.password
+            password: this.password,
           },
           headers: {
-            'Content-Type': 'application/json'
-          }
-        }
+            'Content-Type': 'application/json',
+          },
+        },
       );
 
       // Log successful RTN consultation
       await this.userLogsService.createLog(
         user.id,
         UserAction.READ,
-        `Consulta exitosa de RTN: ${rtn}`
+        `Consulta exitosa de RTN: ${rtn}`,
       );
 
       return response.data;
@@ -110,45 +133,44 @@ export class RtnService {
       await this.userLogsService.createLog(
         user.id,
         UserAction.READ,
-        `Error en consulta de RTN: ${rtn} - ${axios.isAxiosError(error) ? error.response?.data?.message || 'Error de conexión' : error.message}`
+        `Error en consulta de RTN: ${rtn} - ${axios.isAxiosError(error) ? error.response?.data?.message || 'Error de conexión' : error.message}`,
       );
 
       if (axios.isAxiosError(error)) {
         throw new HttpException(
           error.response?.data?.message || 'Error al consultar el RTN',
-          error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR
+          error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
       throw error;
     }
   }
 
-  async consultarVentasBrutas(data: VentasBrutasRequest, user: { id: string; username: string }): Promise<VentasBrutasResponse> {
+  async consultarVentasBrutas(
+    data: VentasBrutasRequest,
+    user: { id: string; username: string },
+  ): Promise<VentasBrutasResponse> {
     try {
       this.validateRtn(data.Rtn);
       this.validatePeriodos(data.PeriodoDesde, data.PeriodoHasta);
 
       const url = `http://${this.apiHost}/int-middleware-gateway/api/v1/AMDC/ConsultaVentasBrutas`;
-      
-      const response = await axios.post<VentasBrutasResponse>(
-        url,
-        data,
-        {
-          auth: {
-            username: this.username,
-            password: this.password
-          },
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+
+      const response = await axios.post<VentasBrutasResponse>(url, data, {
+        auth: {
+          username: this.username,
+          password: this.password,
+        },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
       // Log successful ventas brutas consultation
       await this.userLogsService.createLog(
         user.id,
         UserAction.READ,
-        `Consulta exitosa de Ventas Brutas - RTN: ${data.Rtn}, Periodo: ${data.PeriodoDesde}-${data.PeriodoHasta}`
+        `Consulta exitosa de Ventas Brutas - RTN: ${data.Rtn}, Periodo: ${data.PeriodoDesde}-${data.PeriodoHasta}`,
       );
 
       return response.data;
@@ -157,13 +179,14 @@ export class RtnService {
       await this.userLogsService.createLog(
         user.id,
         UserAction.READ,
-        `Error en consulta de Ventas Brutas - RTN: ${data.Rtn}, Periodo: ${data.PeriodoDesde}-${data.PeriodoHasta} - ${axios.isAxiosError(error) ? error.response?.data?.message || 'Error de conexión' : error.message}`
+        `Error en consulta de Ventas Brutas - RTN: ${data.Rtn}, Periodo: ${data.PeriodoDesde}-${data.PeriodoHasta} - ${axios.isAxiosError(error) ? error.response?.data?.message || 'Error de conexión' : error.message}`,
       );
 
       if (axios.isAxiosError(error)) {
         throw new HttpException(
-          error.response?.data?.message || 'Error al consultar las ventas brutas',
-          error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR
+          error.response?.data?.message ||
+            'Error al consultar las ventas brutas',
+          error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
       throw error;

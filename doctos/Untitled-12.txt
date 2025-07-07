@@ -1,0 +1,5 @@
+http://172.20.40.47:7075/int-middleware-gateway/api/v1/AMDC/ConsultaRTN
+
+INT-AMDC-API : 
+
+Lk0DQ2Ng7$1s

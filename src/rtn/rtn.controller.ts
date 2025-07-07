@@ -2,7 +2,10 @@ import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { RtnService } from './rtn.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RtnResponse } from './interfaces/rtn-response.interface';
-import { VentasBrutasResponse, VentasBrutasRequest } from './interfaces/ventas-brutas-response.interface';
+import {
+  VentasBrutasResponse,
+  VentasBrutasRequest,
+} from './interfaces/ventas-brutas-response.interface';
 import { Request } from 'express';
 
 interface RequestWithUser extends Request {
@@ -17,7 +20,7 @@ export class RtnController {
   @Post('consulta')
   async consultarRtn(
     @Body('rtn') rtn: string,
-    @Req() request: RequestWithUser
+    @Req() request: RequestWithUser,
   ): Promise<RtnResponse> {
     const user = request.user as { id: string; username: string };
     return await this.rtnService.consultarRtn(rtn, user);
@@ -26,7 +29,7 @@ export class RtnController {
   @Post('ventas-brutas')
   async consultarVentasBrutas(
     @Body() data: VentasBrutasRequest,
-    @Req() request: RequestWithUser
+    @Req() request: RequestWithUser,
   ): Promise<VentasBrutasResponse> {
     const user = request.user as { id: string; username: string };
     return await this.rtnService.consultarVentasBrutas(data, user);
