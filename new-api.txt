@@ -1,11 +1,1 @@
-URL='https://swint.sar.gob.hn'
-'userName'='AMDC',
-'password'='6+M_8JxL2x'
-
-Comparto los datos solicitados:
-
-Usuario: AMDC
-URL:
-https://swint.sar.gob.hn/autenticar 
-https://swint.sar.gob.hn/api/RTN/ObtenerInformacionRTNAMDC 
-https://swint.sar.gob.hn/api/PRD/ObtenerVentasConsolidadas
+text
